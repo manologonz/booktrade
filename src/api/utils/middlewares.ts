@@ -10,7 +10,7 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
 
 // Error response handler
 export function errorHandler(err: HttpError, req: Request, res: Response, next: NextFunction) {
-    res.status(err.statusCode);
+    res.status(err.statusCode || 500);
     const data: ErrorResponse = {
         detail: err.isFieldValidation ? err.errorFields : err.message,
     }

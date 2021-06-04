@@ -1,7 +1,8 @@
 import {Request, Response, NextFunction} from "express";
-import {validationResult, Result} from "express-validator";
+import {validationResult} from "express-validator";
 import {checkErrors} from "../utils/helpers";
 import User from "../models/user";
+import AuthToken from "../models/authToken";
 import {TUser, IUser, TUserTokenInfo} from "../models/types";
 import * as jwt from "jsonwebtoken";
 import * as bycript from "bcryptjs";
@@ -45,7 +46,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
             lastName: user.lastName,
         }
         const token = jwt.sign(tokenInfo, <string>process.env.JWT_SECRET);
-        
+        await AuthToken.deleteMany({user: user._id});
+        const newToken = new AuthToken({
+            user: user._id,
+            token
+        });
+        await newToken.save();
         res.json({user: tokenInfo,token});
     } catch(err) {
         next(err);

@@ -1,5 +1,5 @@
 import {Request} from "express";
-import {IUser} from "../models/types";
+import {IUser, ILeanUser} from "../models/types";
 
 // interfaces / types
 export type FieldErrors = {
@@ -14,7 +14,7 @@ export type ErrorResponse = {
 export type Port = string | number;
 
 export interface AuthRequest extends Request {
-    user: IUser | null;
+    user: ILeanUser | null;
 }
 
 
@@ -27,7 +27,7 @@ export class HttpError extends Error {
     constructor(message: string, statusCode?: number, isFieldValidation: boolean=false, errorFields: FieldErrors={}) {
         super(message);
         this.message = message;
-        this.statusCode = statusCode || 500;
+        this.statusCode = !!statusCode ? statusCode : 500;
         this.isFieldValidation = isFieldValidation;
         this.errorFields = errorFields;
     }
