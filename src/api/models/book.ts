@@ -1,7 +1,7 @@
 import {Schema, model} from "mongoose";
-import {IBook} from "./types";
+import { BookDocument, BookModel } from "./types";
 
-const bookSchema = new Schema({
+const bookSchema = new Schema<BookDocument, BookModel>({
     title: {
         type: String,
         required: true
@@ -35,6 +35,10 @@ const bookSchema = new Schema({
         type: Date,
         required: true
     },
+    description: {
+        type: String,
+        required: true
+    },
     category: {
         type: String,
         required: true
@@ -42,7 +46,18 @@ const bookSchema = new Schema({
     isbn: {
         type: String,
         required: true
-    }
+    },
+    seller: {
+        _id: Schema.Types.ObjectId,
+        firstName: String,
+        lastName: String
+    } 
 });
 
-export default model<IBook>("Book", bookSchema);
+bookSchema.index({title: 1});
+bookSchema.index({publisher: 1});
+bookSchema.index({price: 1});
+bookSchema.index({lenguage: 1});
+bookSchema.index({publshed: 1});
+
+export default model<BookDocument, BookModel>("Book", bookSchema);

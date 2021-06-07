@@ -129,6 +129,12 @@ export function createBookValidators(): ValidationChain[] {
         .bail()
         .custom(notCero)
         .withMessage(notCeroMessage("quantity"));
+    const description = body("description")
+        .exists()
+        .withMessage(requiredMessage("description"))
+        .bail()
+        .isString()
+        .withMessage(stringMessage("description"));
 
     return [
         title,
@@ -142,6 +148,7 @@ export function createBookValidators(): ValidationChain[] {
         published,
         category,
         isbn,
-        quantity
+        quantity,
+        description,
     ];
 }

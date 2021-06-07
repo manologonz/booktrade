@@ -1,9 +1,12 @@
 import {Request, Response, NextFunction} from "express";
 import User from "../models/user";
 import AuthToken from "../models/authToken";
-import {TUserTokenInfo} from "../models/types";
+import Book from "../models/book";
+import {IUserTokenInfo} from "../models/types";
 import * as jwt from "jsonwebtoken";
 import {HttpError} from "../utils/types";
+import {ObjectIdValidator} from "../utils/helpers";
+import {ObjectId} from "mongoose";
 
 function getTokenFromHeader(req: Request): string {
     const authHeader = req.headers.authorization;
@@ -13,7 +16,7 @@ function getTokenFromHeader(req: Request): string {
     return authHeader.split(" ")[1];
 }
 
-async function validateToken(data: TUserTokenInfo, token:string): Promise<boolean> {
+async function validateToken(data: IUserTokenInfo, token:string): Promise<boolean> {
     const validToken = await AuthToken.findOne({user: data._id}); // gets the stored token.
     if(validToken) {
         if(validToken.user.toString() === data._id.toString() && validToken.token === token) {
@@ -26,8 +29,8 @@ async function validateToken(data: TUserTokenInfo, token:string): Promise<boolea
 export async function isAuthenticated(req: Request, res: Response, next: NextFunction) {
     try {
         const token = getTokenFromHeader(req);
-        const key = <string>process.env.JWT_SECRET;
-        const data = <TUserTokenInfo>jwt.verify(token, key); // throw an error if the token is not valid.
+        const key = process.env.JWT_SECRET || "secret";
+        const data = <IUserTokenInfo>jwt.verify(token, key); // throw an error if the token is not valid.
         const isValidToken = await validateToken(data, token); // verifies that the token is valid within the system
         if(!isValidToken) {
             throw new Error("No valid token"); // thorw a generic error;
@@ -41,5 +44,23 @@ export async function isAuthenticated(req: Request, res: Response, next: NextFun
         // it passes to the handleError middleware a general 
         // "NotAuthorized" error.
         next(new HttpError("Not Authorized", 403));
+    }
+}
+
+export async function isBookSeller(req: Request, res: Response, next: NextFunction) {
+    const objectIdValidator = new ObjectIdValidator();
+    try {
+        const _id = req.params.bookId;
+        objectIdValidator.single(_id);
+        const book = await Book.findOne({_id: _id}).lean();
+        if(!book) {
+            throw new HttpError("A Book with that id could not be found");
+        }
+        if(req.user?._id === book.seller._id) {
+            throw new HttpError("Not Authorized", 403);
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
 }

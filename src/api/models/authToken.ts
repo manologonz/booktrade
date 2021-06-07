@@ -1,5 +1,5 @@
 import {Schema, model} from "mongoose";
-import {IAuthToken} from "./types";
+import {AuthTokenDocument} from "./types";
 
 const authTokenSchema = new Schema({
     user: {
@@ -12,4 +12,4 @@ const authTokenSchema = new Schema({
     }
 });
 
-export default model<IAuthToken>("AuthToken", authTokenSchema);
+export default model<AuthTokenDocument>("AuthToken", authTokenSchema);

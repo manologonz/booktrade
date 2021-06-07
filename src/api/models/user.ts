@@ -1,7 +1,7 @@
 import {Schema, model} from "mongoose";
-import {IUser} from "./types";
+import {UserDocument, UserModel, ROLES} from "./types";
 
-const userSchema = new Schema({
+const userSchema = new Schema<UserDocument, UserModel>({
     username: {
         type: String,
         required: true
@@ -21,7 +21,27 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    role: {
+        type: Number,
+        enum: [0, 1, 2],
+        default: 2,
+        required: true,
+    },
 });
 
-export default model<IUser>("User", userSchema);
+userSchema.index({firstName: "text", lastName: "text"}, {name: "name search index"});
+
+userSchema.virtual("fullName").get(function (this: UserDocument): string {
+    return `${this.firstName} ${this.lastName}`;
+});
+
+userSchema.methods.getRole = function (this: UserDocument): string {
+    return ROLES[this.role];
+};
+
+userSchema.methods.isValidPassword = async function(this: UserDocument, password: string, cb: Function): Promise<boolean> {
+    return true;
+}
+
+export default model<UserDocument, UserModel>("User", userSchema);

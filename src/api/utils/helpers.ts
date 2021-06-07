@@ -1,6 +1,7 @@
 import {Result} from "express-validator";
 import {HttpError} from "../utils/types";
 import {FieldErrors} from "./types";
+import {isValidObjectId, ObjectId} from "mongoose";
 
 export function checkErrors(result: Result) {
     if(!result.isEmpty()) {
@@ -19,3 +20,21 @@ export function checkErrors(result: Result) {
     }
 }
 
+
+
+export class ObjectIdValidator {
+    
+    single(id: any) {
+        if(!isValidObjectId(id) || !id) {
+            throw new HttpError("Invalid ID", 400);
+        }
+    }
+
+    many(ids: any[]) {
+        ids.forEach((id) => {
+            if(!isValidObjectId(id) || !id) {
+                throw new HttpError("Invalid ID", 400);
+            }
+        });
+    }
+}
