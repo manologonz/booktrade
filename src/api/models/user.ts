@@ -1,5 +1,5 @@
 import {Schema, model} from "mongoose";
-import {UserDocument, UserModel, ROLES} from "./types";
+import {UserDocument, UserModel, ROLES, URole} from "./types";
 
 const userSchema = new Schema<UserDocument, UserModel>({
     username: {
@@ -25,7 +25,7 @@ const userSchema = new Schema<UserDocument, UserModel>({
     role: {
         type: Number,
         enum: [0, 1, 2],
-        default: 2,
+        default: URole.CLIENT,
         required: true,
     },
 });
