@@ -1,14 +1,17 @@
 import {Schema, model} from "mongoose";
 import { BookDocument, BookModel } from "./types";
+const mongoosastic = require("mongoosastic");
 
 const bookSchema = new Schema<BookDocument, BookModel>({
     title: {
         type: String,
-        required: true
+        required: true,
+        es_indexed: true
     },
     subtitle: {
         type: String,
-        required: false
+        required: false,
+        es_indexed: true
     },
     quantity: {
         type: Number,
@@ -17,7 +20,8 @@ const bookSchema = new Schema<BookDocument, BookModel>({
     author: [String],
     publisher: {
         type: String,
-        required: true
+        required: true,
+        es_indexed: true
     },
     pages: {
         type: Number,
@@ -25,15 +29,18 @@ const bookSchema = new Schema<BookDocument, BookModel>({
     },
     price: {
         type: Number,
-        required: true
+        required: true,
+        es_indexed: true
     },
     lenguage: {
         type: String,
-        required: true
+        required: true,
+        es_indexed: true
     },
     published: {
         type: Date,
-        required: true
+        required: true,
+        es_indexed: true
     },
     description: {
         type: String,
@@ -41,23 +48,24 @@ const bookSchema = new Schema<BookDocument, BookModel>({
     },
     category: {
         type: String,
-        required: true
+        required: true,
+        es_indexed: true
     },
     isbn: {
         type: String,
-        required: true
+        required: true,
+        es_indexed: true
     },
     seller: {
         _id: Schema.Types.ObjectId,
         firstName: String,
         lastName: String
-    } 
+    }
 });
 
-bookSchema.index({title: 1});
-bookSchema.index({publisher: 1});
-bookSchema.index({price: 1});
-bookSchema.index({lenguage: 1});
-bookSchema.index({publshed: 1});
+bookSchema.plugin(mongoosastic, {
+    "host": "localhost",
+    "port": 9200
+});
 
 export default model<BookDocument, BookModel>("Book", bookSchema);
