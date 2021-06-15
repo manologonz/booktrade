@@ -9,16 +9,17 @@ import {ObjectIdValidator} from "../utils/helpers";
 export async function listBooks(req: Request, res: Response, next: NextFunction) {
     try {
         // pagination
-        const limit = parseInt(<string>req.query.limit, 10) || 10;
-        const skip = <number>req.skip || 0;
-        const page = parseInt(<string>req.query.page, 10) || 1;
+        const {limit, page} = req.query;
+        const _limit = parseInt(limit as string) || 10;
+        const skip = (req.skip as number) || 0;
+        const _page = parseInt(page as string) || 1;
         const count = await Book.find({}).countDocuments({});
-        const pageCount = Math.ceil(count / <number>limit);
+        const pageCount = Math.ceil(count / _limit);
         // sorting and result query
-        const _sort = <string>req.query.sort || "title";
-        const result = await Book.find({}).limit(limit).skip(skip).sort(_sort);
+        const _sort = (req.query.sort as string) || "title";
+        const result = await Book.find({}).limit(_limit).skip(skip).sort(_sort);
         const next = hasNextPages(req)(pageCount) 
-        ? `${req.protocol}://${req.get("host")}/api/book?page=${page + 1}` : false;
+        ? `${req.protocol}://${req.get("host")}/api/book?page=${_page + 1}` : false;
         const data: PaginatedResponse = {
             next,
             count,
@@ -48,8 +49,8 @@ export async function createBook(req: Request, res: Response, next: NextFunction
             description: req.body.description,
             seller: {
                 _id: req.user._id,
-                firstName: req.user?.firstName,
-                lastName: req.user?.lastName
+                firstName: req.user.firstName,
+                lastName: req.user.lastName
             }
         };
         if(req.body.subtitle) {

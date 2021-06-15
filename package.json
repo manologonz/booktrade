@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/index.ts",
-    "build": "tsc -p ."
+    "build": "tsc -p .",
+    "seed-users": "ts-node ./src/commands/scripts/user.seed.script.ts"
   },
   "keywords": [],
   "author": "manologonz",

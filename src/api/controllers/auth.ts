@@ -42,8 +42,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         const tokenInfo: IUserTokenInfo = {
             _id: user._id,
             username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            fullName: user.fullName,
             role: user.getRole()
         }
         const token = jwt.sign(tokenInfo, <string>process.env.JWT_SECRET);

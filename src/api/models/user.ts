@@ -1,5 +1,6 @@
 import {Schema, model} from "mongoose";
 import {UserDocument, UserModel, ROLES, URole} from "./types";
+import * as bcrypt from "bcryptjs";
 
 const userSchema = new Schema<UserDocument, UserModel>({
     username: {
@@ -40,8 +41,8 @@ userSchema.methods.getRole = function (this: UserDocument): string {
     return ROLES[this.role];
 };
 
-userSchema.methods.isValidPassword = async function(this: UserDocument, password: string, cb: Function): Promise<boolean> {
-    return true;
+userSchema.methods.isValidPassword = function(this: UserDocument, password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password as string);
 }
 
 export default model<UserDocument, UserModel>("User", userSchema);

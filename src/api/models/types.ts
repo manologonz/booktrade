@@ -1,5 +1,8 @@
 import {Document, LeanDocument, ObjectId, Model} from "mongoose";
 
+/**
+ * * USER TYPES
+ */
 export const ROLES = {
     0: "ADMINISTRATOR",
     1: "CLIENT",
@@ -20,6 +23,23 @@ export interface User {
     role: URole,
 }
 
+export interface UserDocument extends User, Document {
+    fullName: string;
+    getRole(): string;
+    isValidPassword(password: string, cb: Function): Promise<boolean>;
+}
+
+export interface UserModel extends Model<UserDocument> {
+
+}
+
+export interface UserLeanDocument extends LeanDocument<UserDocument>{
+
+}
+
+/**
+ * * BOOK TYPES
+ */
 export interface Book {
     title: String;
     subtitle?: String;
@@ -34,44 +54,6 @@ export interface Book {
     isbn: String,
     description: String,
     seller: SellerObjectId | SellerPopulated
-}
-
-export interface IUserTokenInfo {
-    _id: ObjectId
-    username: String,
-    firstName: String,
-    lastName: String,
-    role: string
-};
-
-type SellerObjectId = {
-    _id: ObjectId;
-    firstName: String;
-    lastName: String;
-};
-
-interface SellerPopulated {
-    _id: User;
-    firstName: String;
-    lastName: String;
-};
-
-export interface AuthToken {
-    user: ObjectId | User
-    token: String
-}
-export interface UserDocument extends User, Document {
-    fullName: string;
-    getRole(): string;
-    isValidPassword(password: string, cb: Function): Promise<boolean>;
-}
-
-export interface UserModel extends Model<UserDocument> {
-
-}
-
-export interface UserLeanDocument extends LeanDocument<UserDocument>{
-
 }
 
 export interface BookBaseDocument  extends Book, Document {
@@ -90,6 +72,32 @@ export interface BookPopulatedDocument extends BookBaseDocument {
     seller: SellerPopulated;
 }
 
+type SellerObjectId = {
+    _id: ObjectId;
+    firstName: String;
+    lastName: String;
+};
+
+interface SellerPopulated {
+    _id: User;
+    firstName: String;
+    lastName: String;
+};
+
+
+/**
+ * * AUTH TOKEN TYPES
+ */
+export interface IUserTokenInfo {
+    _id: ObjectId
+    username: String,
+    fullName: string,
+    role: string
+};
+export interface AuthToken {
+    user: ObjectId | User
+    token: String
+}
 export interface AuthTokenBaseDocument extends AuthToken, Document {
 }
 
