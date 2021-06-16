@@ -5,7 +5,8 @@ import {checkErrors} from "../utils/helpers"
 import {validationResult} from "express-validator";
 import { HttpError, PaginatedResponse} from "../utils/types";
 import {hasNextPages} from "express-paginate";
-import {ObjectIdValidator} from "../utils/helpers";
+import {ObjectIdValidator, esClient} from "../utils/helpers";
+
 export async function listBooks(req: Request, res: Response, next: NextFunction) {
     try {
         // pagination
@@ -18,7 +19,7 @@ export async function listBooks(req: Request, res: Response, next: NextFunction)
         // sorting and result query
         const _sort = (req.query.sort as string) || "title";
         const result = await Book.find({}).limit(_limit).skip(skip).sort(_sort);
-        const next = hasNextPages(req)(pageCount) 
+        const next = hasNextPages(req)(pageCount)
         ? `${req.protocol}://${req.get("host")}/api/book?page=${_page + 1}` : false;
         const data: PaginatedResponse = {
             next,
@@ -28,14 +29,13 @@ export async function listBooks(req: Request, res: Response, next: NextFunction)
         res.json(data);
     } catch(err) {
         next(err);
-    } 
+    }
 }
 
 export async function createBook(req: Request, res: Response, next: NextFunction) {
     try {
         checkErrors(validationResult(req));
-        if(!req.user) throw new HttpError("Not Authorized", 403);
-        const data: IBook = {
+        if(!req.user) throw new HttpError("Not Authorized", 403); const data: IBook = {
             title: req.body.title,
             author: req.body.author,
             publisher: req.body.publisher,
@@ -53,14 +53,46 @@ export async function createBook(req: Request, res: Response, next: NextFunction
                 lastName: req.user.lastName
             }
         };
+
         if(req.body.subtitle) {
             data.subtitle = req.body.subtitle;
         }
         let book = new Book(data);
         book = await book.save();
+        await esClient.index({
+            index: "book",
+            body: {
+                id: book._id,
+                title: book.title,
+                subtitle: book.subtitle
+            }
+        });
         res.json(book);
     } catch(err) {
         next(err);
+    }
+}
+
+export async function searchSuggest(req:Request, res: Response, next: NextFunction) {
+    try {
+        const criteria = req.query.search as string;
+        const result = await esClient.search({
+            index: "book",
+            body: {
+                suggest: {
+                    "title-suggest": {
+                        prefix: `${criteria}`,
+                        completion: {
+                            field: "title"
+                        }
+                    }
+                }
+            }
+        })
+        const suggestions = result.body.suggest["title-suggest"][0].options;
+        res.json({suggestions});
+    } catch(error){
+        next(error);
     }
 }
 

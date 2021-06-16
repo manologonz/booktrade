@@ -3,7 +3,7 @@ import {validationResult} from "express-validator";
 import {checkErrors} from "../utils/helpers";
 import User from "../models/user";
 import AuthToken from "../models/authToken";
-import {User as IUser, UserDocument, UserLeanDocument, IUserTokenInfo} from "../models/types";
+import {User as IUser, UserDocument, UserLeanDocument, IUserTokenInfo, URole} from "../models/types";
 import * as jwt from "jsonwebtoken";
 import * as bycript from "bcryptjs";
 import { HttpError } from "../utils/types";
@@ -21,7 +21,14 @@ export async function register(req: Request, res: Response, next: NextFunction) 
         }
         let user = new User(data);
         user = await user.save();
-        res.json(user);
+        res.json({
+            _id: user._id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: URole[user.role]
+        });
     } catch(err) {
         next(err);
     }

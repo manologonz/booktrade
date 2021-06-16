@@ -1,7 +1,9 @@
+import {Request, Response, NextFunction} from "express";
 import {Result} from "express-validator";
 import {HttpError} from "../utils/types";
 import {FieldErrors} from "./types";
-import {isValidObjectId, ObjectId} from "mongoose";
+import {isValidObjectId} from "mongoose";
+import {Client} from "@elastic/elasticsearch";
 
 export function checkErrors(result: Result) {
     if(!result.isEmpty()) {
@@ -23,7 +25,7 @@ export function checkErrors(result: Result) {
 
 
 export class ObjectIdValidator {
-    
+
     single(id: any) {
         if(!isValidObjectId(id) || !id) {
             throw new HttpError("Invalid ID", 400);
@@ -36,5 +38,31 @@ export class ObjectIdValidator {
                 throw new HttpError("Invalid ID", 400);
             }
         });
+    }
+}
+
+export const esClient = new Client({node: "http://localhost:9200"});
+
+export async function createElasticBookIndex() {
+    try {
+      await esClient.indices.create({
+        index: "book",
+        body: {
+          mappings: {
+            properties: {
+              title: {
+                type: "completion"
+              }
+            }
+          }
+        }
+      });
+    } catch(error) {
+      console.log(error)
+      if(error.statusCode === 400) {
+        console.log("index already created");
+      } else {
+        console.log(error);
+      }
     }
 }

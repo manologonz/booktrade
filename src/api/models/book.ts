@@ -1,6 +1,5 @@
 import {Schema, model} from "mongoose";
 import { BookDocument, BookModel } from "./types";
-const mongoosastic = require("mongoosastic");
 
 const bookSchema = new Schema<BookDocument, BookModel>({
     title: {
@@ -63,9 +62,5 @@ const bookSchema = new Schema<BookDocument, BookModel>({
     }
 });
 
-bookSchema.plugin(mongoosastic, {
-    "host": "localhost",
-    "port": 9200
-});
 
 export default model<BookDocument, BookModel>("Book", bookSchema);
